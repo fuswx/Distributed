@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+    <title>地铁积水态势感知预警系统</title>
+
+    <link href="css/index.css" rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="css/map.css" rel="stylesheet" th:href="@{/css/map.css}">
+
+</head>
+<body>
+
+<section id="main-window">
+    <div id="touch-title"></div>
+    <div id="map-header">
+        <span id="map-title">
+            地铁积水态势感知预警系统
+        </span>
+    </div>
+    <div id="map-left-close">
+        <span>  </span>
+    </div>
+    <div id="map-left">
+        <div id="dev-title">
+            <span id="dev-title-text">设备列表</span>
+            <span id="dev-title-textimg"></span>
+        </div>
+
+        <div>
+
+        </div>
+
+            <div th:each="devSta:${devStatus}">
+                <div class="map-left-device">
+                    <div class="map-left-device-img">
+                        <img src="img/下载.jpg" style="width: 100%;height: 100%">
+                    </div>
+                    <div class="map-left-device-middle">
+                        <span class="map-left-device-name">
+                            <span class="map-left-device-name-scroll">地铁1号紫金山路A1</span>
+                        </span>
+                        <span class="map-left-device-buttery"> [[${devSta.devBattery}]]%</span>
+                        <span class="map-left-device-single"> 良好</span>
+                    </div>
+                    <div class="map-left-device-switch">
+                        <input type="checkbox" class="map-left-device-switch-see">
+                    </div>
+                    <div class="none-box" style="display: none">
+                        <span class="water" style="display: none">[[${devSta.devLevel}]]</span>
+                        <span class="battery" style="display: none">[[${devSta.devBattery}]]</span>
+                        <span class="temperature" style="display: none">[[${devSta.devTemperature}]]</span>
+                        <span class="humidity" style="display: none">[[${devSta.devHumidity}]]</span>
+                        <span class="devId" style="display: none">[[${devSta.devId}]]</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    <div id="map-right">
+        <div id="map-right-text">
+            <span id="map-right-text-detail">水位:
+                <span id="water-level">x</span>mm
+            </span>
+            <span id="map-right-close"></span>
+            <span id="none-devId" style="display: none"></span>
+        </div>
+        <div id="map-right-content">
+            <div id="map-right-level-num">
+                <span class="map-right-level-num" id="map-right-level-num-4">4</span>
+                <span class="map-right-level-num" id="map-right-level-num-3">3</span>
+                <span class="map-right-level-num" id="map-right-level-num-2">2</span>
+                <span class="map-right-level-num" id="map-right-level-num-1">1</span>
+                <span class="map-right-level-num" id="map-right-level-num-0">0</span>
+            </div>
+            <img src="img/水位图.png"/>
+            <div id="map-right-content-level"></div>
+
+        </div>
+        <div id="map-right-options">
+            <span class="see-history-button" id="see-history"><a href="#">查看历史</a></span>
+            <span class="see-history-button"><a href="#">导出数据</a></span>
+        </div>
+    </div>
+    <div id="map-out-box">
+
+        <div class="map" id="map-ele">
+            <!-- 站点层 -->
+            <div id="station-ele" class="station"></div>
+            <!-- 控制按钮 -->
+            <div class="controls">
+                <button onclick="m.scale += 0.15;m.update();">+</button>
+                <button onclick="m.scale -= 0.15;m.update();">-</button>
+            </div>
+            <!-- 路线图 -->
+            <canvas id="line-ele" width="800" height="600">
+                <div class="canvas-tip">
+                    <h1>:)</h1>
+                    <h2>很抱歉，您的浏览器版本过低</h2>
+                    <p>请使用Chrome, Firefox, 等现代浏览器。</p>
+                </div>
+            </canvas>
+            <!-- 聚焦路线层 -->
+            <canvas id="plan-ele" width="800" height="600"></canvas>
+        </div>
+    </div>
+</section>
+
+<div id="look-history">
+    <span id="look-history-close"></span>
+    <div id="look-history-echarts">
+
+    </div>
+</div>
+
+</body>
+
+<script th:src="@{/javascript/echarts.min.js}"></script>
+<!--<script type="text/javascript" src="https://api.map.baidu.com/api?type=subway&v=1.0&ak=qy8US2ZppOOqRX3ZzkUEx4Axfix0fD61"></script>-->
+<!--<script type="text/javascript" src="https://webapi.amap.com/subway?v=1.0&key=5197a895efe888c24f9a71be73bb82e5&callback=cbk"></script>-->
+<script type="text/javascript" th:src="@{/javascript/jquery-3.6.0.min.js}"></script>
+<script type="text/javascript" th:src="@{/javascript/jquery.mousewheel.min.js}"></script>
+<script type="text/javascript" th:src="@{/javascript/map-canvas.js}"></script>
+<script type="text/javascript" th:src="@{/javascript/index.js}"></script>
+
+<script type="text/javascript">
+    var mapurl = 'https://api.zzmetro.com/api/mapData?date=2021-11-22',
+        navurl = 'https://api.zzmetro.com/api/price',
+        baseUrl = 'https://api.zzmetro.com/',
+        sendData = {};
+    window.onload = function () {
+        $.ajax({
+            url: mapurl,
+            dataType: "jsonp",
+            success: function (data) {
+                m.init(data.data, 'https://www.zzmetro.com/lines/query/station/zid/'); // 地图初始化
+                m.nav(0, 0);
+            }
+        });
+
+    };
+    $(m.ele).on('nav', function () {
+        sendData.begin = m.navigation.sid;
+        sendData.end = m.navigation.eid;
+        sendData.type = $('#type').val();
+        nav();
+    });
+
+    $('#type').on('change', function () {
+        sendData.type = $('#type').val();
+        nav();
+    });
+
+
+    function nav() {
+        $.ajax({
+            url: navurl,
+            data: sendData,
+            success: function (res) {
+                var data = res.data;
+                var plans = data.plans;
+                m.nav_data(plans);
+                var str = '';
+                var index = 0;
+                var transfer = '';
+                for (var i in plans) {
+                    var _class = plans[i].line.id;
+                    if (index == 0) {
+                        transfer = '乘坐';
+                    } else {
+                        transfer = '换乘';
+                        _class = plans[i - 1].line.id + '_' + _class
+                    }
+                    str += '<div class="line' + _class + '" style="overflow: hidden;">\n' +
+                        '                        <span class="hc_lf"></span>\n' +
+                        '                        <div class="hc_div09">\n' +
+                        '                            <span></span>\n' +
+                        '                            <h1 style="width: 100%;">' + plans[i].stations[0].name + '</h1>\n' +
+                        '                            <p>' + transfer + '<em>' + plans[i].line.name + '</em>通往 <b><i>';
+                    if (plans[i].direction == 'up') {
+                        str += plans[i].line.start_station;
+                    } else {
+                        str += plans[i].line.end_station;
+                    }
+                    str += '</i></b> 方向</p>\n' +
+                        '                        </div>\n' +
+                        '                    </div>';
+                    index++;
+                }
+                var last = plans[plans.length - 1].line.id;
+                str += '<div class="line_end line' + last + '"> ' +
+                    '<span class="hc_lf"></span> ' +
+                    '<div class="hc_div03">' +
+                    '<span></span> ' +
+                    '<h1><b>' +
+                    plans[plans.length - 1].stations[plans[plans.length - 1].stations.length - 1].name +
+                    '</b> 下车</h1>' +
+                    '</div>' +
+                    '</div>';
+                $('.hc_div').html(str);
+
+
+                var html = data.path;
+                html += '<br><b>票价:' + data.price + '元</b>';
+                html += '<br><b>用时：约' + timeFormat(data.time) + '(不包含换乘)</b>';
+                $('.hc_xx').html(html);
+
+                $('.gh').slideDown();
+            }
+        });
+    }
+
+    function timeFormat(result) {
+        var h = Math.floor(result / 3600 % 24);
+        var m = Math.floor(result / 60 % 60);
+        if (h < 1) {
+            return result = m + "分钟";
+        } else {
+            return result = h + "小时" + m + "分钟";
+        }
+    }
+</script>
+
+</html>

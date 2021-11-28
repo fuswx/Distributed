@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:mysql://47.95.112.136:3306/distributed
+    username: root
+    password: yzc13569291231
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8082
+  servlet:
+    context-path: /Distributed

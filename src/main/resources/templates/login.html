@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>用户登录</title>
+
+    <link href="css/style.css" rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="css/style-responsive.css" rel="stylesheet" th:href="@{/css/style-responsive.css}">
+
+</head>
+
+<body class="login-body">
+
+<div class="container">
+
+    <form class="form-signin" action="/login" method="post" th:action="@{/login}">
+        <div class="form-signin-heading text-center">
+            <h1 class="sign-title">地铁积水预警系统</h1>
+        </div>
+        <div class="login-wrap">
+            <label style="color: red" th:text="${msg}"></label>
+            <input type="text" class="form-control" placeholder="User ID" autofocus name="userName">
+            <input type="password" class="form-control" placeholder="Password" name="password">
+
+            <button class="btn btn-lg btn-login btn-block" type="submit">
+                <i class="fa fa-check"></i>
+            </button>
+
+            <label class="checkbox">
+                <input type="checkbox" value="remember-me"> 记住我
+                <span class="pull-right">
+
+                </span>
+            </label>
+
+        </div>
+    </form>
+
+</div>
+
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/modernizr.min.js"></script>
+<script type="text/javascript" src="js/jquery-3.6.0.min.js" th:src="@{/javascript/jquery-3.6.0.min.js}"></script>
+
+<script>
+    $(function (){
+        $(".form-signin").stop().fadeIn(1000)
+    })
+</script>
+
+</body>
+</html>
